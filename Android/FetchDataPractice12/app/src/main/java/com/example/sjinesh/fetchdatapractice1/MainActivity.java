@@ -1,9 +1,12 @@
 package com.example.sjinesh.fetchdatapractice1;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -38,16 +41,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     new JsonTask().execute("http://jsonparsing.parseapp.com/jsonData/moviesDemoItem.txt");
-                    toPlaceInImageView = LoadImageFromWebOperations("http://romancebandits.com/wp-content/uploads/2012/09/Great-job1.jpg");
-
-                    targetImageView.setImageDrawable(toPlaceInImageView);
+                    new DownloadImageTask(targetImageView).execute("http://romancebandits.com/wp-content/uploads/2012/09/Great-job1.jpg");
                 }
             });
         }
     }
 
-    public class JsonTask extends AsyncTask<String, String, String> {
-
+    private class JsonTask extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... params) {
             //first need to set up an http url connection.
@@ -102,12 +102,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static Drawable LoadImageFromWebOperations(String url) {
-        try {
-            InputStream is = (InputStream) new URL(url).getContent();
-            return Drawable.createFromStream(is, "targetImageView");
-        } catch (Exception e) {
-            return null;
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 
